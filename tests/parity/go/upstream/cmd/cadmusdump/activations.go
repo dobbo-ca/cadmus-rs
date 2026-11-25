@@ -65,7 +65,7 @@ func dumpActivations(modelPath, imagePath string, w io.Writer) error {
 		return fmt.Errorf("normalizing: %w", err)
 	}
 	// Keyed "Normalized", not "Input": the graph's Input layer is also named
-	// "Input", and two blocks with the same header make Step 6's diff ambiguous.
+	// "Input", and two blocks with the same header make the diff ambiguous.
 	if err := writeBlock(w, "Normalized", norm.Input); err != nil {
 		return err
 	}

@@ -25,7 +25,7 @@ package tessdata
 //	<type-specific body>
 //
 // GENERIC_2D_ARRAY<T>::DeSerialize + DeSerializeSize (src/ccstruct/matrix.h).
-// This is the piece the plan flagged as unspecified; field order is exactly:
+// Field order is exactly:
 //
 //	int32   dim1               ; rejected above UINT16_MAX
 //	int32   dim2               ; rejected above UINT16_MAX
@@ -248,7 +248,7 @@ type Recognizer struct {
 	TrainingIteration int32
 
 	// SampleIteration seeds LSTMRecognizer::SetRandomSeed, which drives the
-	// random edge padding Convolve applies at image borders. L1b needs it.
+	// random edge padding Convolve applies at image borders. This port needs it.
 	SampleIteration int32
 
 	// NullChar is the network output index of the CTC blank. It is the
@@ -316,7 +316,7 @@ func ParseRecognizer(data []byte, swap bool) (*Recognizer, error) {
 	}
 
 	if rec.IsIntMode() {
-		return nil, fmt.Errorf("tessdata: training_flags %d has TF_INT_MODE set: this is an int8-quantized model. Cadmus L1 implements the float weight path only; run ./testdata/fetch.sh to get the tessdata_best model", rec.TrainingFlags)
+		return nil, fmt.Errorf("tessdata: training_flags %d has TF_INT_MODE set: this is an int8-quantized model. Cadmus implements the float weight path only; use the tessdata_best model", rec.TrainingFlags)
 	}
 	if rec.TrainingFlags&tfCompressUnicharset == 0 {
 		return nil, fmt.Errorf("tessdata: training_flags %d has TF_COMPRESS_UNICHARSET clear: the model has no recoder and LSTMRecognizer::LoadRecoder would synthesise a pass-through one. Cadmus requires a recoding model", rec.TrainingFlags)
@@ -608,7 +608,7 @@ func parseMatrix(r *Reader) (Matrix, error) {
 		return Matrix{}, fmt.Errorf("matrix mode %d has kDoubleFlag clear, selecting WeightMatrix::DeSerializeOld (float32 weights); cadmus supports only the modern float64 format", mode)
 	}
 	if mode&modeInt8Flag != 0 {
-		return Matrix{}, fmt.Errorf("matrix mode %d has kInt8Flag set: this is an int8-quantized model. Cadmus L1 implements the float weight path only; run ./testdata/fetch.sh to get the tessdata_best model", mode)
+		return Matrix{}, fmt.Errorf("matrix mode %d has kInt8Flag set: this is an int8-quantized model. Cadmus implements the float weight path only; use the tessdata_best model", mode)
 	}
 	return readFloat64Matrix(r)
 }

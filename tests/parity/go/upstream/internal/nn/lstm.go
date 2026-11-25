@@ -63,10 +63,10 @@ func NewLSTM(name string, ni, na int, summary bool, g [numGates]*Matrix) (*LSTM,
 	// LSTM::DeSerialize derives is_2d_ as na_ - nf_ == ni_ + 2*ns_. With no
 	// softmax feedback nf_ is zero, so a 1-D layer has na == ni + ns exactly.
 	if na == ni+2*ns {
-		return nil, fmt.Errorf("nn: lstm %q is 2-D (na=%d, ni=%d, ns=%d); 2-D LSTMs and their GFS gate are out of scope for L1b", name, na, ni, ns)
+		return nil, fmt.Errorf("nn: lstm %q is 2-D (na=%d, ni=%d, ns=%d); 2-D LSTMs and their GFS gate are out of scope", name, na, ni, ns)
 	}
 	if na != ni+ns {
-		return nil, fmt.Errorf("nn: lstm %q has na=%d but ni+ns=%d; softmax-feedback LSTMs are out of scope for L1b", name, na, ni+ns)
+		return nil, fmt.Errorf("nn: lstm %q has na=%d but ni+ns=%d; softmax-feedback LSTMs are out of scope", name, na, ni+ns)
 	}
 	return &LSTM{name: name, NI: ni, NS: ns, NA: na, Summary: summary, Gates: g}, nil
 }

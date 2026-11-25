@@ -161,7 +161,7 @@ func (d *Dawg) edgeOf(node, id int, wordEnd bool) int {
 // lstm-number-dawg: in those, Dawg::kPatternUnicharID (== 0, src/dict/dawg.h:117)
 // on an edge is a WILDCARD meaning "any dictionary word" / "any digit run", not
 // the space character. Matching it literally silently mis-answers both of those
-// lexicons. L1a has no consumer that needs pattern semantics — cadmusdump prints
+// lexicons. Nothing here is a consumer that needs pattern semantics — cadmusdump prints
 // only edge counts — so the wildcard machinery (DawgPosition,
 // Dict::LetterIsOkay) is deferred to L2b's internal/dict along with the
 // DawgType tag that would make these methods safe to call on all three.

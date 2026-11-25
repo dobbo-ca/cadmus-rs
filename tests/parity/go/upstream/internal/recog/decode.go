@@ -89,13 +89,13 @@ func NewRecognizer(model []byte) (*Recognizer, error) {
 	if rc.Size() != cs.Size() {
 		return nil, fmt.Errorf("recog: recoder has %d entries but the unicharset has %d", rc.Size(), cs.Size())
 	}
-	// L1b implements only the length-1 recoder fast path: network output index
+	// Only the length-1 recoder fast path: network output index
 	// -> code -> unichar id is then a flat near-permutation, and the whole
 	// partial-code dimension of RecodeBeamSearch (kNumLengths, GetNextCodes,
 	// GetFinalCodes) collapses to a no-op. internal/tessdata loads multi-code
 	// recoders happily; the restriction is the beam's, so it lives here.
 	if rc.MaxCodeLen() != 1 {
-		return nil, fmt.Errorf("recog: recoder has codes up to %d long; L1b supports single-code recoders only (see cad-q16)", rc.MaxCodeLen())
+		return nil, fmt.Errorf("recog: recoder has codes up to %d long; only single-code recoders are supported", rc.MaxCodeLen())
 	}
 	if space := rc.Encode(tessdata.UnicharSpace); len(space) != 1 || space[0] != tessdata.UnicharSpace {
 		return nil, fmt.Errorf("recog: space was garbled in recoding")

@@ -142,7 +142,7 @@ func (m *Model) validate() error {
 // NT_LSTM_SOFTMAX / NT_LSTM_SOFTMAX_ENCODED nest a FullyConnected softmax
 // inside the LSTM's Children, so such a model has the nested one plus the
 // network's own output layer. Returning nil there — and validate() therefore
-// rejecting the model — is the correct L1a behaviour: cadmus does not
+// rejecting the model — is the correct behaviour: cadmus does not
 // implement that topology, and failing loudly beats guessing. Do not "fix"
 // this into returning the outermost match.
 func (m *Model) Softmax() *Layer {

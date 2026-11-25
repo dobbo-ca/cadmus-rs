@@ -188,7 +188,7 @@ func (d *Dict) LetterIsOkay(prev PermuterType, active []Position, unicharID int,
 		}
 
 		// DAWG_TYPE_PATTERN would be handled here, before the edge lookup.
-		// L1b declares no such type; see Step 1 branch 7.
+		// This port declares no such type.
 
 		node := startingNode(dw, pos.DawgRef)
 		e := tessdata.NoEdge
@@ -224,7 +224,7 @@ func (d *Dict) LetterIsOkay(prev PermuterType, active []Position, unicharID int,
 	// matters: when this letter's own best permuter is PUNC_PERM and a core word
 	// was already established, the OLD permuter is preserved. That is why
 	// "(the)" reports SystemDawgPerm at the closing paren rather than PuncPerm,
-	// and Task 23 branches on exactly that value.
+	// and the word-level code branches on exactly that value.
 	out := prev
 	if prev == NoPerm || curr == NoPerm || curr != PuncPerm {
 		out = curr

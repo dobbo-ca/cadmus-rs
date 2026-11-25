@@ -52,7 +52,7 @@ type wordGroup struct {
 // splitWords cuts at UNICHAR_SPACE. Tesseract additionally cuts at a
 // start_of_word node and, under TOP_CHOICE_PERM, at every character of a
 // non-space-delimited script; the first only exists in the dictionary path
-// (Task 23) and the second cannot occur while the recoder is restricted to
+// and the second cannot occur while the recoder is restricted to
 // Latin single-code models.
 func splitWords(syms []Scored) []wordGroup {
 	var groups []wordGroup

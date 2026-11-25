@@ -67,7 +67,7 @@ func (x *Tensor) CopyTimeStepPart(t, offset, n int, src *Tensor, srcT, srcOffset
 
 // MaxpoolTimeStep takes the elementwise maximum of timestep t and src's
 // timestep srcT, in place. Tesseract also records which source timestep won,
-// for the backward pass; L1b is inference only, so that is omitted.
+// for the backward pass; this port is inference only, so that is omitted.
 func (x *Tensor) MaxpoolTimeStep(t int, src *Tensor, srcT int) {
 	dst := x.Row(t)
 	for i, v := range src.Row(srcT) {
