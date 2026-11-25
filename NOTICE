@@ -1,0 +1,119 @@
+Cadmus
+Copyright 2026 Chris Dobbyn
+
+This product includes software ported from Tesseract OCR
+(https://github.com/tesseract-ocr/tesseract), Copyright the Tesseract
+contributors, licensed under the Apache License, Version 2.0.
+
+Portions of this software are Go translations of Tesseract C++ source. Such
+files carry a header identifying the Tesseract source file they derive from.
+The translations are not verbatim: data structures, memory management, error
+handling, and concurrency have been reimplemented in idiomatic Go, and the
+legacy (pre-4.0) recognition engine, training tooling, debug viewer, and
+fixed-pitch analysis are not included.
+
+Tesseract's own NOTICE obligations, where applicable, are carried forward here.
+
+This product also includes software ported from Leptonica
+(https://github.com/DanBloomberg/leptonica), Copyright Dan S. Bloomberg,
+licensed under the BSD 2-Clause License, reproduced below.
+internal/imaging/scalegray.go is a Go translation of pixScale and the 8bpp
+routines it reaches, from Leptonica 1.87.0: src/scale1.c, src/enhance.c and
+src/pix2.c. The translation is not verbatim.
+
+  Copyright (C) 2001 Leptonica.  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
+  are met:
+  1. Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above
+     copyright notice, this list of conditions and the following
+     disclaimer in the documentation and/or other materials
+     provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL ANY
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+  OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+This crate is a Rust port of github.com/dobbo-ca/cadmus at b7fac51.
+
+src/nn/tables.rs holds the tanh and logistic lookup tables of Tesseract's src/lstm/functions.cpp
+(Apache License, Version 2.0, see above), carried over from internal/nn/tables.go.
+
+These Rust files are translations of Tesseract OCR sources (Apache License, Version 2.0, see
+above), made through the Go port, and each carries a header naming its Tesseract source files:
+src/nn/funcs.rs (src/lstm/functions.h); src/nn/layers.rs and src/nn/mod.rs (src/lstm: network,
+plumbing, series, parallel, reversed, input, convolve, reconfig, maxpool, fullyconnected, lstm);
+src/dict/mod.rs (src/dict/dict.cpp, dict.h); src/tessdata/dawg.rs (src/dict/dawg.cpp, dawg.h);
+src/tessdata/network.rs (src/lstm/network.cpp, plumbing.cpp, lstm.cpp, fullyconnected.cpp,
+convolve.cpp, maxpool.cpp, reconfig.cpp, input.cpp, lstmrecognizer.cpp, weightmatrix.cpp and
+src/ccstruct/matrix.h); src/tessdata/recoder.rs (src/ccutil/unicharcompress.cpp, .h);
+src/tessdata/unicharset.rs (src/ccutil/unicharset.cpp); src/tessdata/mod.rs (tessdatamanager.cpp,
+serialis.cpp); src/recog/build.rs (src/lstm/network.cpp); src/recog/beam.rs (src/lstm/recodebeam.cpp);
+src/recog/certainty.rs (src/lstm/networkio.cpp, recodebeam.cpp); src/recog/decode.rs
+(src/lstm/recodebeam.cpp, lstmrecognizer.cpp); src/recog/normalize.rs (src/lstm/networkio.cpp,
+input.cpp, src/ccstruct/imagedata.cpp, statistc.cpp); src/recog/words.rs (src/lstm/recodebeam.cpp,
+src/ccmain/linerec.cpp, ltrresultiterator.cpp); src/recog/mod.rs (the same files).
+
+src/imaging/scalegray.rs is a Rust translation of pixScale and the 8bpp routines it reaches, from
+Leptonica 1.87.0 (src/scale1.c, src/enhance.c, src/pix2.c); the Leptonica BSD 2-Clause licence is
+reproduced above.
+
+src/nn/funcs.rs (go_exp) follows Go's amd64 math.Exp (src/math/exp_amd64.s) and go_log follows
+Go's amd64 math.Log (src/math/log_amd64.s, log.go, from FreeBSD's e_log.c, notice below),
+src/imaging/gomath.rs is Go's pure math.Sin, math.Cos, math.Tan and trigReduce (src/math/sin.go,
+tan.go, trig_reduce.go; the latter derived from Cephes, Copyright Stephen L. Moshier), and
+src/tessdata/goquote.rs follows Go's strconv.Quote and IsPrint (src/strconv/quote.go), so that
+results equal the Go library's. They are reproduced under the Go licence:
+
+Copyright 2009 The Go Authors.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google LLC nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+The exp method is Naoki Shibata's, from SLEEF (public domain).
+
+go_log, src/nn/funcs.rs, derives from FreeBSD's /usr/src/lib/msun/src/e_log.c through Go's
+src/math/log.go, which came with this notice:
+
+====================================================
+Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
+
+Developed at SunPro, a Sun Microsystems, Inc. business.
+Permission to use, copy, modify, and distribute this
+software is freely granted, provided that this notice
+is preserved.
+====================================================

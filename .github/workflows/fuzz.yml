@@ -1,0 +1,136 @@
+name: fuzz
+on:
+  schedule: [{ cron: '23 18 * * 6' }]
+  workflow_dispatch:
+    inputs:
+      max_total_time:
+        description: Seconds per target
+        default: '600'
+permissions:
+  contents: read
+# A new run waits for the one before it; it does not cancel it.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  fuzz:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      # Two fuzz jobs at a time, at most.
+      max-parallel: 2
+      matrix:
+        target: [container, unicharset, recoder, dawg, lstm, model_mutate, pgm, imaging, threads, grid, recognize, tensor, network, dict]
+    timeout-minutes: 60
+    env:
+      MAX_TOTAL_TIME: ${{ inputs.max_total_time || '600' }}
+      # model_mutate inputs are one keep byte and up to ten six-byte edits: 61 bytes. libFuzzer's
+      # length control would otherwise keep them at 16 bytes (two edits) for most of a run.
+      EXTRA: ${{ matrix.target == 'model_mutate' && '-max_len=64 -len_control=0' || '' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { lfs: false }
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: .github/ci/Dockerfile
+          target: fuzz
+          load: true
+          push: false
+          tags: cadmus-fuzz:local
+          cache-from: type=gha,scope=cadmus-rs-fuzz
+          cache-to: type=gha,mode=max,scope=cadmus-rs-fuzz
+      # The corpus is kept between runs: restored here, copied into the container, copied back
+      # out and saved, so a run goes on from where the last one stopped. One cache per target; the
+      # newest is restored. The key prefix holds the architecture: `fuzz-corpus-imaging-` would also
+      # match the arm64 job's `fuzz-corpus-imaging-arm64-<run>`, which is saved first, and the x86
+      # job would restore the arm64 corpus and its own would never be read.
+      - id: corpus
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: corpus
+          key: fuzz-corpus-x86-${{ matrix.target }}-${{ github.run_id }}
+          restore-keys: fuzz-corpus-x86-${{ matrix.target }}-
+      # docker create + start, not a RUN layer: a BuildKit cache hit would skip the fuzzing.
+      # Seeds: tests/fuzz/seeds/<target> (the components of the eng model, the line corpus and small
+      # hand-made inputs; the Go repo has no fuzz seeds); new inputs go to the first corpus dir.
+      # -malloc_limit_mb is the backstop; the targets also fail on an OutOfMemory error, which
+      # means an allocation was attempted outside the limits. The model the recognizer targets
+      # read is in the image (CADMUS_MODEL); most of them run a mini model built from it.
+      - run: |
+          mkdir -p corpus/${{ matrix.target }}
+          docker create --name fuzz -e MAX_TOTAL_TIME -e EXTRA -e TARGET=${{ matrix.target }} cadmus-fuzz:local \
+            sh -c 'cargo +nightly fuzz run --fuzz-dir tests/fuzz $TARGET tests/fuzz/corpus/$TARGET tests/fuzz/seeds/$TARGET -- -max_total_time=$MAX_TOTAL_TIME -timeout=20 -rss_limit_mb=2048 -malloc_limit_mb=512 $EXTRA'
+          docker cp corpus fuzz:/src/tests/fuzz/
+          docker start -a fuzz
+      - if: failure()
+        run: docker cp fuzz:/src/tests/fuzz/artifacts/${{ matrix.target }} ./crashers
+      - if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: crashers-${{ matrix.target }}
+          path: crashers
+      - if: always()
+        run: docker cp fuzz:/src/tests/fuzz/corpus/${{ matrix.target }}/. corpus/${{ matrix.target }}/ || true
+      - if: always()
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: corpus
+          key: fuzz-corpus-x86-${{ matrix.target }}-${{ github.run_id }}
+
+  # The imaging and threads targets on a native arm64 runner: the same `cargo +nightly fuzz run` as
+  # above, fuzzing the scalar code and the threaded bands on the other architecture (weaker memory
+  # ordering). It waits for the matrix above, so with it no more than two fuzz jobs run at once.
+  fuzz-arm64:
+    needs: fuzz
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04-arm
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        target: [imaging, threads]
+    timeout-minutes: 60
+    env:
+      MAX_TOTAL_TIME: ${{ inputs.max_total_time || '600' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { lfs: false }
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: .github/ci/Dockerfile
+          target: fuzz
+          load: true
+          push: false
+          tags: cadmus-fuzz-arm64:local
+          cache-from: type=gha,scope=cadmus-rs-fuzz-arm64
+          cache-to: type=gha,mode=max,scope=cadmus-rs-fuzz-arm64
+      # The corpus is kept between runs, as in the fuzz job.
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: corpus
+          key: fuzz-corpus-arm64-${{ matrix.target }}-${{ github.run_id }}
+          restore-keys: fuzz-corpus-arm64-${{ matrix.target }}-
+      - run: |
+          mkdir -p corpus/${{ matrix.target }}
+          docker create --name fuzz -e MAX_TOTAL_TIME -e TARGET=${{ matrix.target }} cadmus-fuzz-arm64:local \
+            sh -c 'cargo +nightly fuzz run --fuzz-dir tests/fuzz $TARGET tests/fuzz/corpus/$TARGET tests/fuzz/seeds/$TARGET -- -max_total_time=$MAX_TOTAL_TIME -timeout=20 -rss_limit_mb=2048 -malloc_limit_mb=512'
+          docker cp corpus fuzz:/src/tests/fuzz/
+          docker start -a fuzz
+      - if: failure()
+        run: docker cp fuzz:/src/tests/fuzz/artifacts/${{ matrix.target }} ./crashers
+      - if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: crashers-${{ matrix.target }}-arm64
+          path: crashers
+      - if: always()
+        run: docker cp fuzz:/src/tests/fuzz/corpus/${{ matrix.target }}/. corpus/${{ matrix.target }}/ || true
+      - if: always()
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: corpus
+          key: fuzz-corpus-arm64-${{ matrix.target }}-${{ github.run_id }}

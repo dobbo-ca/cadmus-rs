@@ -1,0 +1,113 @@
+[package]
+name = "cadmus-fuzz"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+cadmus = { path = "../.." }
+
+# Not part of the root package: only this crate may depend on libfuzzer-sys.
+[workspace]
+
+[[bin]]
+name = "container"
+path = "fuzz_targets/container.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "unicharset"
+path = "fuzz_targets/unicharset.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "recoder"
+path = "fuzz_targets/recoder.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "dawg"
+path = "fuzz_targets/dawg.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "lstm"
+path = "fuzz_targets/lstm.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "model_mutate"
+path = "fuzz_targets/model_mutate.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "pgm"
+path = "fuzz_targets/pgm.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "imaging"
+path = "fuzz_targets/imaging.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "grid"
+path = "fuzz_targets/grid.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "tensor"
+path = "fuzz_targets/tensor.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "recognize"
+path = "fuzz_targets/recognize.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "network"
+path = "fuzz_targets/network.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "dict"
+path = "fuzz_targets/dict.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "threads"
+path = "fuzz_targets/threads.rs"
+test = false
+doc = false
+bench = false

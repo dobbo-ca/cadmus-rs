@@ -1,0 +1,16 @@
+[package]
+name = "cadmus-quality-labels"
+version = "0.0.0"
+edition = "2024"
+publish = false
+description = "Cuts text-line crops out of the label pages of whole-slide images for the OCR quality gate (docs/quality.md)."
+
+[dependencies]
+# tiff-rs main (jpeg-rs and deflate-rs come with it). CI only: this tool is not part of the crate.
+tiff = { git = "https://github.com/dobbo-ca/tiff-rs", rev = "29c7500d2707dbe908df883efb402aa8cd948141" }
+
+# tiff-rs main pins jpeg-rs c722342; jpeg-rs main (22a2c31) has the same src/, so this is the
+# decoder of both current mains.
+
+# Not part of the root package.
+[workspace]

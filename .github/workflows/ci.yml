@@ -1,0 +1,136 @@
+name: ci
+on: { pull_request: {}, push: { branches: [main] }, workflow_dispatch: {} }
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  # The checks run inside .github/ci/Dockerfile with BuildKit; the layers are saved to the Actions
+  # cache (one scope per job).
+  # x86_64 jobs run on ubuntu-24.04, arm64 jobs natively on ubuntu-24.04-arm (no emulation).
+  # A PR needs only `test` and `fuzz-build`; arm64, parity and parity-arm64 run on main and on
+  # workflow_dispatch.
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { lfs: false }
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: .github/ci/Dockerfile
+          target: ci
+          push: false
+          outputs: type=cacheonly
+          cache-from: type=gha,scope=cadmus-rs-test
+          # Only main and dispatch runs export: a PR's cache is scoped to its ref, so no other PR
+          # could read it, and the export takes about two minutes.
+          cache-to: ${{ github.event_name != 'pull_request' && 'type=gha,mode=max,scope=cadmus-rs-test' || '' }}
+
+  arm64:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { lfs: false }
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: .github/ci/Dockerfile
+          target: arm64
+          push: false
+          outputs: type=cacheonly
+          cache-from: type=gha,scope=cadmus-rs-arm64
+          cache-to: type=gha,mode=max,scope=cadmus-rs-arm64
+
+  parity:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { lfs: false }
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: .github/ci/Dockerfile
+          target: parity
+          push: false
+          outputs: type=cacheonly
+          cache-from: type=gha,scope=cadmus-rs-parity
+          cache-to: type=gha,mode=max,scope=cadmus-rs-parity
+
+  # The Go side of parity-arm64: Go's math.Exp differs between amd64 and arm64, and the claim is that
+  # Rust on aarch64 equals Go on amd64, so the Go subset runs here on x86_64 and parity-arm64
+  # downloads its inputs and outputs.
+  go-arm64-data:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { lfs: false }
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: .github/ci/Dockerfile
+          target: go-arm64-data
+          push: false
+          outputs: type=local,dest=go-arm64-data
+          cache-from: type=gha,scope=cadmus-rs-go-arm64-data
+          cache-to: type=gha,mode=max,scope=cadmus-rs-go-arm64-data
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: go-arm64-data
+          path: go-arm64-data
+
+  parity-arm64:
+    needs: go-arm64-data
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { lfs: false }
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: go-arm64-data
+          path: go-arm64-data
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: .github/ci/Dockerfile
+          target: parity-arm64
+          push: false
+          outputs: type=cacheonly
+          cache-from: type=gha,scope=cadmus-rs-parity-arm64
+          cache-to: type=gha,mode=max,scope=cadmus-rs-parity-arm64
+
+  # The fuzz targets must build: fuzz.yml runs them nightly and on dispatch only, so a break would
+  # otherwise go unseen until then. Not run, only built. (fuzz.yml also runs them on arm64.)
+  fuzz-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: { lfs: false }
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: .github/ci/Dockerfile
+          target: fuzz
+          push: false
+          outputs: type=cacheonly
+          cache-from: type=gha,scope=cadmus-rs-fuzz-build
+          # Only main and dispatch runs export: a PR's cache is scoped to its ref, so no other PR
+          # could read it, and the export takes about two minutes.
+          cache-to: ${{ github.event_name != 'pull_request' && 'type=gha,mode=max,scope=cadmus-rs-fuzz-build' || '' }}

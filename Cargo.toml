@@ -1,0 +1,17 @@
+[package]
+name = "cadmus"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+license = "Apache-2.0"
+description = "Pure Rust OCR engine: Tesseract LSTM models, image preprocessing and recognition. Rust port of dobbo-ca/cadmus."
+publish = false
+
+[dependencies]
+# Worker pool: the caller's, the crate's lazy shared one, or a call's own. See docs/dependencies.md.
+rayon = "1.11"
+
+# The tests run the real LSTM over a corpus of lines; unoptimized that takes far too long. Debug
+# assertions and overflow checks stay on.
+[profile.test]
+opt-level = 3
