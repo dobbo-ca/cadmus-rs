@@ -7,7 +7,7 @@ description = "Cuts text-line crops out of the label pages of whole-slide images
 
 [dependencies]
 # tiff-rs main (jpeg-rs and deflate-rs come with it). CI only: this tool is not part of the crate.
-tiff = { git = "https://github.com/dobbo-ca/tiff-rs", rev = "29c7500d2707dbe908df883efb402aa8cd948141" }
+tiff = { git = "https://github.com/dobbo-ca/tiff-rs", rev = "8511ab4468be2ce08df1c6c7c5019a120b9e4838" }
 
 # jpeg-rs and deflate-rs come in through tiff-rs, so this is the same decoder as tiff-rs's.
 
