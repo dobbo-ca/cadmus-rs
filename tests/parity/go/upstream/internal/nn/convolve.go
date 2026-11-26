@@ -19,7 +19,7 @@ import "fmt"
 // Off-image taps are filled from the recognizer's LCG, not with zeros. Whether
 // that matters for recognized text is unmeasured; what is certain is that
 // substituting zeros will not match Tesseract's activations, so the border of
-// every feature map would differ and Task 14's per-layer diff would be unusable.
+// every feature map would differ and a per-layer diff would be unusable.
 type Convolve struct {
 	name         string
 	HalfX, HalfY int

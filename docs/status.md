@@ -2,8 +2,8 @@
 
 The whole library is ported (`nn`, `imaging`, `tessdata`, `dict`, `recog` and the `cadmusdump`
 tool, `src/bin/cadmusdump.rs`), with resource limits and threading, Go parity (`tests/parity/`),
-fuzzing (`tests/fuzz/`) and the benchmark (`examples/bench.rs`; [benchmarks.md](benchmarks.md)). The Go repo is at L1 of its
-design: a line crop in, text out, matching `tesseract --psm 13`; there is no page-level entry
+fuzzing (`tests/fuzz/`) and the benchmark (`examples/bench.rs`; [benchmarks.md](benchmarks.md)). The scope is
+that of the Go library: a line crop in, text out, matching `tesseract --psm 13`; there is no page-level entry
 point yet, so the public surface is the five modules, as in Go (where they are `internal/`), plus
 `par` (`for_each_chunk_mut`, the pool helper the threaded calls use, and `ThreadPool`) and the
 ledger types `Budget`, `Buf` and `Hold` that `Limits` goes with. There is no SIMD tier.

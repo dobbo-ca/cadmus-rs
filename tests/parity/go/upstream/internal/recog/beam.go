@@ -58,7 +58,7 @@ import (
 //     NO_PERM; the one inside the run loop makes the space forget those nulls
 //     and needs permuter == NO_PERM.
 //
-// One correction to the plan, from the source: the permuter is NOT threaded
+// From the source: the permuter is NOT threaded
 // across ContinueDawg calls. src/lstm/recodebeam.cpp:1101 constructs
 // `DawgArgs dawg_args(&initial_dawgs, updated_dawgs, NO_PERM)` afresh on every
 // call, and DawgArgs' third constructor parameter is the in/out permuter
@@ -70,7 +70,7 @@ import (
 const (
 	// beamWidth is kBeamWidths[0]: the heap size for completed characters.
 	// Tesseract's wider entries apply only to partial multi-code sequences,
-	// which L1b's single-code recoder restriction rules out.
+	// which the single-code recoder restriction rules out.
 	beamWidth = 5
 	// worstDictCert is kWorstDictCertainty / kCertaintyScale = -25/7.
 	worstDictCert = -25.0 / CertaintyScale
@@ -685,7 +685,7 @@ func (r *Recognizer) pathAsScored(path []*node) []Scored {
 
 // BeamDecode is RecodeBeamSearch::Decode followed by ExtractBestPaths and
 // ExtractPathAsUnicharIds. It returns the same Scored slice the greedy path
-// produces, so Task 20's word segmentation is reused unchanged.
+// produces, so the word segmentation is reused unchanged.
 func (r *Recognizer) BeamDecode(out *nn.Tensor) ([]Scored, error) {
 	if out.Features != r.Net.NumOutputs {
 		return nil, fmt.Errorf("recog: output has %d features, want %d", out.Features, r.Net.NumOutputs)

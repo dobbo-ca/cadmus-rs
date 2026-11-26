@@ -37,7 +37,7 @@ checksum = "a31eee39dddec8330830986fcd7625edb5a24ec90ea038215273bbc3adb08ac6"
 [[package]]
 name = "deflate"
 version = "0.1.0"
-source = "git+https://github.com/dobbo-ca/deflate-rs?rev=5021ec1161342392b811f7fc482dd0bc22c128c0#5021ec1161342392b811f7fc482dd0bc22c128c0"
+source = "git+https://github.com/dobbo-ca/deflate-rs?rev=211232f521f4378efd74f224df2fc05213cec94a#211232f521f4378efd74f224df2fc05213cec94a"
 
 [[package]]
 name = "either"
@@ -48,7 +48,7 @@ checksum = "0e9c71c2167ca323c882b99918929403426e2373ea17242ff5653e0d5e1058be"
 [[package]]
 name = "jpeg"
 version = "0.1.0"
-source = "git+https://github.com/dobbo-ca/jpeg-rs?rev=c722342214e16448719a03cd9cbf915227231516#c722342214e16448719a03cd9cbf915227231516"
+source = "git+https://github.com/dobbo-ca/jpeg-rs?rev=c0cf0fcc3a5c4284bf09615cea44660247f07e99#c0cf0fcc3a5c4284bf09615cea44660247f07e99"
 dependencies = [
  "rayon",
 ]
@@ -76,7 +76,7 @@ dependencies = [
 [[package]]
 name = "tiff"
 version = "0.1.0"
-source = "git+https://github.com/dobbo-ca/tiff-rs?rev=29c7500d2707dbe908df883efb402aa8cd948141#29c7500d2707dbe908df883efb402aa8cd948141"
+source = "git+https://github.com/dobbo-ca/tiff-rs?rev=8511ab4468be2ce08df1c6c7c5019a120b9e4838#8511ab4468be2ce08df1c6c7c5019a120b9e4838"
 dependencies = [
  "deflate",
  "jpeg",

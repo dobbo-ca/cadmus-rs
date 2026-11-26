@@ -34,7 +34,7 @@ func dump(path string, opt options, w io.Writer) error {
 		_, _ = fmt.Fprintf(w, "  %-20s %9d bytes\n", t, len(b))
 	}
 
-	// Preserved from the pre-L1a cadmusdump: a legacy (Tesseract-3, no LSTM)
+	// Preserved from the earlier cadmusdump: a legacy (Tesseract-3, no LSTM)
 	// .traineddata still has a printable component inventory, and dumping it is
 	// useful. LoadModel requires the LSTM component, so bail before calling it
 	// rather than turning `cadmusdump some-legacy.traineddata` into exit 1.

@@ -42,7 +42,7 @@ type Normalized struct {
 // `y < target_height`, filling every row past pixGetHeight(pix) with
 // NetworkIO::Randomize. Those draws come from the same TRand that Convolve
 // consumes, so skipping them would desynchronise the edge padding of the whole
-// feature map — which is exactly the failure Task 14's per-layer diff is least
+// feature map — which is exactly the failure a per-layer diff is least
 // able to explain.
 func Normalize(img image.Image, inputHeight, xScale int, rnd *nn.Rand) (*Normalized, error) {
 	if rnd == nil {

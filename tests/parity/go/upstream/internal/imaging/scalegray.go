@@ -6,7 +6,7 @@
 // (pixUnsharpMasking) and src/pix2.c (pixCopyBorder). The translation is not
 // verbatim. See NOTICE.
 //
-// Recorded from the installed 1.87.0 source, as Task 12 Step 1 requires:
+// Recorded from the installed 1.87.0 source:
 //
 //  1. The identity short-circuit is exact equality with no tolerance —
 //     pixScaleGeneral opens with
@@ -15,8 +15,8 @@
 //     resamples. Note the comparison promotes the l_float32 factor to double,
 //     which is reproduced below.
 //
-//  2. The 8bpp dispatch is NOT the three-way table the plan quoted from
-//     master, and pixScale is not pixScaleGeneral: pixScale picks default
+//  2. The 8bpp dispatch is NOT the three-way table of
+//     leptonica master, and pixScale is not pixScaleGeneral: pixScale picks default
 //     sharpening parameters and pixScaleGeneral sharpens with them. In full,
 //     for scalex == scaley == f:
 //
@@ -43,7 +43,7 @@
 //     needed.
 //
 //  3. scaleGrayLILow and scaleGrayAreaMapLow live in src/scale1.c in 1.87.0,
-//     not in the src/scalelow.c the plan named; that file no longer exists.
+//     not in src/scalelow.c, which no longer exists.
 //     Their bodies are transcribed below as scaleGrayLILow and
 //     scaleGrayAreaMapLow, statement for statement.
 //

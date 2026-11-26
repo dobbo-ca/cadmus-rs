@@ -32,7 +32,7 @@ type Network struct {
 // Build converts a parsed layer tree into a runnable nn graph.
 func Build(rec *tessdata.Recognizer) (*Network, error) {
 	if rec.TrainingFlags&tfIntMode != 0 {
-		return nil, fmt.Errorf("recog: model has TF_INT_MODE set (training_flags=%d); L1b supports float weights from tessdata_best only", rec.TrainingFlags)
+		return nil, fmt.Errorf("recog: model has TF_INT_MODE set (training_flags=%d); only float weights from tessdata_best are supported", rec.TrainingFlags)
 	}
 	rnd := nn.NewRand(uint64(int64(rec.SampleIteration) * 0x10000001))
 
@@ -56,7 +56,7 @@ func Build(rec *tessdata.Recognizer) (*Network, error) {
 		Root:        root,
 		InputHeight: shape.Height,
 		NumOutputs:  root.NumOutputs(),
-		// tessdata.Recognizer.NullChar is int32 (L1a Task 4).
+		// tessdata.Recognizer.NullChar is int32.
 		NullChar: int(rec.NullChar),
 		XScale:   xScaleFactor(rec.Network),
 		Rand:     rnd,
@@ -193,7 +193,7 @@ func buildLayer(l *tessdata.Layer, rnd *nn.Rand) (nn.Layer, error) {
 		return nn.NewLSTM(l.Name, l.NumInputs, l.NA, l.Type == tessdata.LayerLSTMSummary, gates)
 
 	default:
-		return nil, fmt.Errorf("recog: layer type %v (%q) is not supported by the L1b runtime", l.Type, l.Name)
+		return nil, fmt.Errorf("recog: layer type %v (%q) is not supported", l.Type, l.Name)
 	}
 }
 
@@ -226,7 +226,7 @@ func checkNumWeights(l *tessdata.Layer) error {
 
 // convertMatrix reshapes a loader matrix into a runtime one. The loader's Cols
 // counts the bias column; the runtime's Inputs does not. The loader's field is
-// named Values (L1a Task 3), not W.
+// named Values, not W.
 func convertMatrix(name string, m tessdata.Matrix) (*nn.Matrix, error) {
 	if m.Cols < 1 {
 		return nil, fmt.Errorf("recog: layer %q has a matrix with %d columns", name, m.Cols)
@@ -258,7 +258,7 @@ func findInputShape(l *tessdata.Layer) *tessdata.InputShape {
 // version, which takes the FIRST child only. Treating them as products is
 // latent for eng — every plumbing node there has exactly one child, so the
 // product equals stack[0] — but it is wrong for any Parallel with two or more
-// children, and Task 1 Step 2 tells the reader to fall back on this function.
+// children, and the reader may fall back on this function.
 func xScaleFactor(l *tessdata.Layer) int {
 	switch l.Type {
 	case tessdata.LayerMaxpool, tessdata.LayerReconfig:

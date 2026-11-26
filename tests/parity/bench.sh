@@ -5,7 +5,7 @@
 # `Limits::max_threads` on a caller-held `ThreadPool` reused across calls, as a server would,
 # like Go's warm goroutine runtime), both on one thread (GOMAXPROCS=1, `max_threads` = 1), and
 # Go at its default against Rust with no caller pool (`Limits::default()`: the crate's lazy
-# shared pool). Every class must be at or below 1.10x Go in all three (conventions.md): the script
+# shared pool). Every class must be at or below 1.10x Go in all three: the script
 # exits non-zero if one is not, after printing all three tables.
 # The Rust binary is $BENCH (default `bench`). When `oracle-v4` (Go built with GOAMD64=v4) and
 # $BENCH_V4 (default `bench-v4`, Rust built with -C target-cpu=x86-64-v4 and the false-deps features
@@ -30,7 +30,7 @@ table() { # title, Go command prefix, Rust bench arguments
 	echo
 	echo '| class | Go ms | Rust ms | Rust / Go |'
 	echo '|---|---|---|---|'
-	# conventions.md: Rust at or below 1.10x Go on every class; a class above it fails the script.
+	# Rust at or below 1.10x Go on every class; a class above it fails the script.
 	join -t "$(printf '\t')" /tmp/go.tsv /tmp/rs.tsv | awk -F'\t' -v gate="$gate" '
 { printf "| %s | %.3f | %.3f | %.2fx |\n", $1, $2, $3, $3 / $2 }
 gate && $3 / $2 > 1.10 { printf "::warning::%s is %.2fx Go (limit 1.10)\n", $1, $3 / $2 > "/dev/stderr"; bad = 1 }

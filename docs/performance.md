@@ -46,8 +46,8 @@ RUSTFLAGS="-C target-cpu=x86-64-v4 -C target-feature=+false-deps-tzcnt,+false-de
   result is the same. The real-file gate ([quality.md](quality.md)) runs an oracle built with these flags and
   holds it to the Go output byte for byte.
 - aarch64: do not set any of these flags (they are x86 only). The default aarch64 target already
-  has NEON; `lto`, `codegen-units` and `panic` apply as above. When arm64 nodes join, build a
-  separate image for them and pick its `target-cpu` for those nodes.
+  has NEON; `lto`, `codegen-units` and `panic` apply as above. To run on arm64 machines too, build
+  a separate binary for them and pick its `target-cpu` for those machines.
 
 ## The v4 bench tables
 
